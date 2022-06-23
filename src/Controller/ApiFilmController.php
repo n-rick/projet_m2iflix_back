@@ -13,6 +13,6 @@ class ApiFilmController extends AbstractController
     public function index(FilmRepository $filmrep): Response
     {
         $films = $filmrep->findAll();
-        return $this->json($films, 200, []);
+        return $this->json($films, 200, [], ['groups' => "film:read"]);
     }
 }

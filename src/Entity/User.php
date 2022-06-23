@@ -2,34 +2,63 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
+#[ApiResource(
+    collectionOperations: [
+        "get", "post"
+    ],
+    itemOperations:["get"],
+    normalizationContext:['groups' => "user:read"],
+    denormalizationContext:['groups' => "user:write"],
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(["user:read","film:read"])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
+    #[Groups(["user:read","film:read"])]
     private $email;
 
     #[ORM\Column(type: 'json')]
+    #[Groups(["user:read","film:read"])]
     private $roles = [];
 
     #[ORM\Column(type: 'string')]
+    #[Groups(["user:read","film:read"])]
     private $password;
 
     #[ORM\Column(type: 'string', length: 180)]
+    #[Groups(["user:read","film:read"])]
     private $nom;
 
     #[ORM\Column(type: 'string', length: 180)]
+    #[Groups(["user:read","film:read"])]
     private $prenom;
+
+    #[ORM\ManyToMany(targetEntity: Film::class, inversedBy: 'users')]
+    #[Groups(["user:read"])]
+    #[ApiSubresource()]
+    private $films;
+
+    public function __construct()
+    {
+        $this->films = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -121,6 +150,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPrenom(string $prenom): self
     {
         $this->prenom = $prenom;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Film>
+     */
+    public function getFilms(): Collection
+    {
+        return $this->films;
+    }
+
+    public function addFilm(Film $film): self
+    {
+        if (!$this->films->contains($film)) {
+            $this->films[] = $film;
+        }
+
+        return $this;
+    }
+
+    public function removeFilm(Film $film): self
+    {
+        $this->films->removeElement($film);
 
         return $this;
     }
