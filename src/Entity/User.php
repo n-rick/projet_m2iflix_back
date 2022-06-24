@@ -2,8 +2,10 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,11 +18,17 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Table(name: '`user`')]
 #[ApiResource(
     collectionOperations: [
-        "get", "post"
+        "get",
+        "post" => ["security" => "is_granted('PUBLIC_ACCESS')"]
+
     ],
     itemOperations:["post", "get", "put", "delete"],
     normalizationContext:['groups' => "user:read"],
     denormalizationContext:['groups' => "user:write"],
+)]
+#[ApiFilter(
+    SearchFilter::class,
+    properties: ['email' => "exact"]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
