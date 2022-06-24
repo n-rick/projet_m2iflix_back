@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     collectionOperations: [
         "get", "post"
     ],
-    itemOperations:["get"],
+    itemOperations:["post", "get", "put", "delete"],
     normalizationContext:['groups' => "user:read"],
     denormalizationContext:['groups' => "user:write"],
 )]
@@ -27,31 +27,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(["user:read","film:read"])]
+    #[Groups(["user:read", "user:write","film:read"])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
-    #[Groups(["user:read","film:read"])]
+    #[Groups(["user:read", "user:write","film:read"])]
     private $email;
 
     #[ORM\Column(type: 'json')]
-    #[Groups(["user:read","film:read"])]
+    #[Groups(["user:read", "user:write", "film:read"])]
     private $roles = [];
 
     #[ORM\Column(type: 'string')]
-    #[Groups(["user:read","film:read"])]
+    #[Groups(["user:read", "user:write","film:read"])]
     private $password;
 
     #[ORM\Column(type: 'string', length: 180)]
-    #[Groups(["user:read","film:read"])]
+    #[Groups(["user:read", "user:write","film:read"])]
     private $nom;
 
     #[ORM\Column(type: 'string', length: 180)]
-    #[Groups(["user:read","film:read"])]
+    #[Groups(["user:read", "user:write","film:read"])]
     private $prenom;
 
     #[ORM\ManyToMany(targetEntity: Film::class, inversedBy: 'users')]
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "user:write"])]
     #[ApiSubresource()]
     private $films;
 
